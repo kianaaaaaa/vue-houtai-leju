@@ -51,7 +51,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: '主页', icon: 'dashboard' }
     }]
   },
 
@@ -60,19 +60,39 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/example/table',
     name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
+    meta: { title: '商品管理', icon: 'example' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
+        path: 'list',
+        name: 'list',
+        component: () => import('@/views/product/list/index'),
+        meta: { title: '商品管理', icon: 'tree' }
+      },
+      {
+        path: 'add',
+        name: 'productAdd',
+        component: () => import('@/views/product/edit/index'),
+        meta: { title: '商品添加', icon: 'table' }
+        // hidden: true
+      },
+      {
+        path: 'sort',
+        name: 'sort',
+        component: () => import('@/views/product/sort/index'),
+        meta: { title: '分类管理', icon: 'table' }
       },
       {
         path: 'tree',
         name: 'Tree',
         component: () => import('@/views/tree/index'),
         meta: { title: 'Tree', icon: 'tree' }
+      },
+      {
+        path: 'edit/:id',
+        name: 'productEdit',
+        component: () => import('@/views/product/edit/index'),
+        meta: { title: '商品编辑', icon: 'tree' },
+        hidden: true
       }
     ]
   },
