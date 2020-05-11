@@ -102,7 +102,34 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/order',
+    component: Layout,
+    name: 'order',
+    meta: { title: '订单管理', icon: 'example' },
+    children: [
+      {
+        path: 'board',
+        name: 'board',
+        component: () => import('@/views/order/board/index'),
+        meta: { title: '订单管理', icon: 'form' }
+      },
+      {
+        path: 'orderBack',
+        name: 'orderBack',
+        component: () => import('@/views/order/orderBack/index'),
+        meta: { title: '退单管理', icon: 'form' }
+      },
+      {
+        path: 'detail/:id',
+        name: 'detail',
+        component: () => import('@/views/order/detail/index'),
+        meta: { title: '订单详情', icon: 'form' },
+        hidden: true
 
+      }
+    ]
+  },
   {
     path: '/form',
     component: Layout,
