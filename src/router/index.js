@@ -82,10 +82,16 @@ export const constantRoutes = [
         meta: { title: '分类管理', icon: 'table' }
       },
       {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
+        path: 'brand',
+        name: 'brand',
+        component: () => import('@/views/product/brand/index'),
+        meta: { title: '品牌管理', icon: 'tree' }
+      },
+      {
+        path: 'series',
+        name: 'series',
+        component: () => import('@/views/product/series/index'),
+        meta: { title: '系列管理', icon: 'tree' }
       },
       {
         path: 'edit/:id',

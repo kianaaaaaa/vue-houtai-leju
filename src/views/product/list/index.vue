@@ -151,10 +151,8 @@ export default {
       startlist: {
         start: 1,
         limit: 10
-
       },
       dialog: false
-
     }
   },
   created() {
