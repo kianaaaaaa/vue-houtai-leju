@@ -9,7 +9,12 @@
         <el-table-column fixed type="index" width="50" align="center" />
         <el-table-column fixed prop="date" label="商品图片" width="200" align="center">
           <template slot-scope="scope" align="center">
-            <img :src="scope.row.coverImg" alt="" style="width: 100px;height: 100px;margin: 0 auto;">
+            <img :src="scope.row.cover_img" alt="" style="width: 100px;height: 100px;margin: 0 auto;">
+          </template>
+        </el-table-column>
+        <el-table-column prop="date" label="背景图片" width="200" align="center">
+          <template slot-scope="scope" align="center">
+            <img :src="scope.row.bg_img" alt="" style="width: 100px;height: 100px;margin: 0 auto;">
           </template>
         </el-table-column>
         <el-table-column label="中文名字" prop="cname" width="180" align="center" />
@@ -24,10 +29,6 @@
           </template>
         </el-table-column>
       </el-table>
-      <div>
-        <MyPagination :page="page" align="right" @handle-size-change="handleSizeChange" @handle-current-change="handleCurrentChange" />
-      </div>
-
     </el-card>
 
     <!-- 弹窗 -->
@@ -41,7 +42,7 @@
       <el-form ref="form" :model="form" label-width="80px">
         <el-row :gutter="30">
           <el-col :span="12">
-            <el-form-item label="图片">
+            <el-form-item label="添加商品图片">
               <el-upload
                 ref="upload"
                 class="upload-demo"
@@ -50,13 +51,31 @@
                 :limit="1"
               >
                 <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                <!-- <el-button size="small" type="primary">点击上传</el-button> -->
-                <div slot="tip" class="el-upload__tip">只能上传jpg/png,不超过500kb,最多4张图片</div>
+                <div slot="tip" class="el-upload__tip">只能上传jpg/png,不超过500kb,最多1张图片</div>
               </el-upload>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <img style="width:120px;height:120px;" :src="form.coverImg">
+            <img style="width:120px;height:120px;" :src="form.cover_img">
+          </el-col>
+        </el-row>
+        <el-row :gutter="30">
+          <el-col :span="12">
+            <el-form-item label="添加背景图片">
+              <el-upload
+                ref="upload"
+                class="upload-demo"
+                action="http://www.bufantec.com/api/leju/admin/material/uploadImg"
+                :on-success="detailImgsSuccess1"
+                :limit="1"
+              >
+                <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传jpg/png,不超过500kb,最多1张图片</div>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <img style="width:120px;height:120px;" :src="form.bg_img">
           </el-col>
         </el-row>
         <el-row :gutter="30" style="margin-top:30px;">
@@ -86,25 +105,18 @@
 </template>
 
 <script>
-import brandApi from '@/api/product/brand'
-import MyPagination from '@/components/MyPagination'
+import seriesApi from '@/api/product/series'
 
 export default {
-  components: {
-    MyPagination
-  },
+
   data() {
     return {
       list: [],
       flag: false,
       form: {
-        coverImg: []
-      },
-      page: {
-        start: 1,
-        limit: 10
+        cover_img: [],
+        bg_img: []
       }
-
     }
   },
   created() {
@@ -112,18 +124,10 @@ export default {
   },
   methods: {
     getsortList() { // 获取数据
-      var data = {
-        ...this.page
-      }
-
-      brandApi.brandList(data).then(res => {
+      seriesApi.seriesList().then(res => {
         console.log('获取数据 ==>', res)
-        this.list = res.data.list
-        this.page = {
-          start: res.data.pageNumber,
-          limit: res.data.pageSize,
-          totalCount: res.data.totalRow
-        }
+        this.list = res.data
+        console.log(this.list)
       })
     },
     add() { // 添加按钮
@@ -143,7 +147,7 @@ export default {
     Update() { // 保存提交
       this.flag = false
       console.log(this.form)
-      brandApi.saveOrUpdate(this.form).then(res => {
+      seriesApi.saveOrUpdate(this.form).then(res => {
         if (res.code === 'S') {
           this.$message({
             type: 'success',
@@ -155,14 +159,7 @@ export default {
         }
       })
     },
-    handleSizeChange(v) {
-      this.page.limit = v
-      this.getsortList()
-    },
-    handleCurrentChange(v) {
-      this.page.start = v
-      this.getsortList()
-    },
+
     handleClose(done) {
       this.$confirm('确认关闭？')
         .then(_ => {
@@ -171,9 +168,13 @@ export default {
         })
         .catch(_ => {})
     },
-    detailImgsSuccess(response, file) {
+    detailImgsSuccess(response, file) { // 商品图片触发事件
       console.log(response, file)
-      this.form.coverImg = response.ossUrl
+      this.form.cover_img = response.ossUrl
+    },
+    detailImgsSuccess1(response, file) { // 背景图片触发事件
+      console.log(response, file)
+      this.form.bg_img = response.ossUrl
     },
     dellist(id) { // 删除按钮
       this.$confirm('此操作将删除该数据, 是否继续?', '提示', {
@@ -182,7 +183,7 @@ export default {
         type: 'warning',
         center: true
       }).then(() => {
-        brandApi.delList({ id }).then(res => {
+        seriesApi.del({ id }).then(res => {
           if (res.code === 'S') {
             this.$message({
               type: 'success',
