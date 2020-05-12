@@ -23,8 +23,17 @@ function orderUserInfo(params) {
     params
   })
 }
+function sendDone(params) { // 提交发货按钮
+  return http({
+    url: '/api/leju/admin/order/sendDone',
+    method: 'post',
+    params
+  })
+}
+
 export default {
   orderList,
   detail,
-  orderUserInfo
+  orderUserInfo,
+  sendDone
 }

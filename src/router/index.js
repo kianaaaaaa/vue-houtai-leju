@@ -121,13 +121,20 @@ export const constantRoutes = [
         meta: { title: '退单管理', icon: 'form' }
       },
       {
+        path: 'orderBacklist/:id',
+        name: 'orderBacklist',
+        component: () => import('@/views/order/orderBacklist/index'),
+        meta: { title: '退单详情', icon: 'form' },
+        hidden: true
+      },
+      {
         path: 'detail/:id',
         name: 'detail',
         component: () => import('@/views/order/detail/index'),
         meta: { title: '订单详情', icon: 'form' },
         hidden: true
-
       }
+
     ]
   },
   {

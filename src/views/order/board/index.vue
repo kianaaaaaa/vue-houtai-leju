@@ -5,22 +5,26 @@
         <span>条件查询</span>
       </div>
       <div class="box-title">
-        <el-row :gutter="20">
+        <el-row :gutter="100">
           <el-col :span="6">
-            <el-input placeholder="请输入内容" />
+            <el-input v-model="Status.name" :value="Status.name" size="small" placeholder="用户名模糊查询" />
           </el-col>
           <el-col :span="6">
-            <el-input placeholder="请输入内容" />
-
+            <!-- <el-input size="small" placeholder="请输入内容" /> -->
+            <el-select v-model="Status.status" size="small" placeholder="请选择">
+              <el-option value="0">正在进行</el-option>
+              <el-option value="1">已关闭</el-option>
+            </el-select>
           </el-col>
           <el-col :span="6">
-            <el-input placeholder="请输入内容" />
+            <el-select v-model="Status.statusend" size="small" placeholder="请选择">
+              <el-option v-for="(v,key) in orderStatusObj" :key="v" :label="v" :value="key" />
+            </el-select>
           </el-col>
-
           <el-col :span="6">
             <div>
-              <el-button type="primary">搜索</el-button>
-              <el-button type="primary">重置</el-button>
+              <el-button size="small" type="primary">搜索</el-button>
+              <el-button size="small" type="primary">重置</el-button>
             </div>
           </el-col>
         </el-row>
@@ -76,10 +80,22 @@ export default {
   },
   data() {
     return {
+      Status: [],
       list: [],
       page: {
         start: 1,
         limit: 10
+      }
+    }
+  },
+  computed: {
+    orderStatusObj() {
+      return {
+        '0': '未付款',
+        '1': '已付款',
+        '2': '已发货',
+        '3': '已收货',
+        '9': '申请退货'
       }
     }
   },

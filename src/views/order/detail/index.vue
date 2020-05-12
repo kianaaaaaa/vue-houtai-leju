@@ -12,6 +12,7 @@
     <el-card :body-style="{ padding: '30px' }" style="margin-top:30px;">
       <div slot="header">
         <span>当前订单状态</span>
+        <span v-if="orderBaseInfo.statusend == '0'" style="color: green;">订单处理中...</span>
       </div>
       <span>基本信息</span>
       <div class="el-row">
@@ -74,9 +75,42 @@
       </div>
       <div class="price-sum">
         合计:
-        <span>￥{{ 500 }}</span>
+        <span>￥{{ mub }}</span>
+      </div>
+
+      <div style="margin-top:50px; width:100%;">
+        <span>费用信息:</span>
+        <div class="el-row">
+          <el-col v-for="(v,key) in cost" :key="key" :span="6">
+            <div class="table-cell-head">
+              <span>{{ key }}</span>
+            </div>
+            <div class="table-cell-body">
+              <span>{{ v }}</span>
+            </div>
+          </el-col>
+        </div>
+      </div>
+
+      <div style="margin-top:50px; width:100%;">
+        <span>申请退款:</span>
+        <div class="el-row">
+          <el-col v-for="(v,key) in refund" :key="key" :span="6">
+            <div class="table-cell-head">
+              <span>{{ key }}</span>
+            </div>
+            <div class="table-cell-body">
+              <span>{{ v }}</span>
+            </div>
+          </el-col>
+        </div>
       </div>
     </el-card>
+    <div style="margin:30px auto 60px; text-align: center;">
+      <el-button v-if="step==1" type="primary" @click="sendDone">已发货</el-button>
+      <el-button v-if="step==2" disabled type="primary">等待客户收货...</el-button>
+      <el-button v-if="step==3" type="primary" @click="closeOrder">关闭订单</el-button>
+    </div>
 
   </div>
 </template>
@@ -86,7 +120,6 @@ import api from '@/api/order/index'
 export default {
   data() {
     return {
-      step: 1,
       list: [],
       orderBaseInfo: [],
       userInfo: [],
@@ -96,33 +129,65 @@ export default {
   computed: {
     orderBaseInfoCom() {
       return {
-        订单编号: this.orderBaseInfo.orderId,
-        用户账号: this.orderBaseInfo.username,
-        订单金额: this.orderBaseInfo.price,
-        订单数量: this.orderBaseInfo.count,
-        订单状态: this.orderBaseInfo.status,
-        是否关闭: this.orderBaseInfo.statusend,
-        下单时间: this.orderBaseInfo.addTime,
-        发货时间: this.orderBaseInfo.sendTime,
-        收货时间: this.orderBaseInfo.receiveTime,
-        退单时间: this.orderBaseInfo.backTime,
-        结束时间: this.orderBaseInfo.endTime,
+        订单编号: '数据错误' || this.orderBaseInfo.orderId,
+        用户账号: '数据错误' || this.orderBaseInfo.username,
+        订单金额: '数据错误' || this.orderBaseInfo.price,
+        订单数量: '数据错误' || this.orderBaseInfo.count,
+        订单状态: '数据错误' || this.orderBaseInfo.status,
+        是否关闭: '数据错误' || this.orderBaseInfo.statusend,
+        下单时间: '数据错误' || this.orderBaseInfo.addTime,
+        发货时间: '数据错误' || this.orderBaseInfo.sendTime,
+        收货时间: '数据错误' || this.orderBaseInfo.receiveTime,
+        退单时间: '数据错误' || this.orderBaseInfo.backTime,
+        结束时间: '数据错误' || this.orderBaseInfo.endTime,
         其他: ''
       }
     },
     userInfoCom() {
       return {
-        收货人: this.userInfo.username + '(' + this.userInfo.NAME + ')',
-        手机号码: this.userInfo.tel,
+        收货人: '数据错误' || this.userInfo.username + '(' + this.userInfo.NAME + ')',
+        手机号码: '数据错误' || this.userInfo.tel,
         邮政编码: '41000',
-        地市: this.userInfo.cityStr,
-        详细地址: this.userInfo.cityBak,
-        邮箱: this.userInfo.email
+        地市: '数据错误' || this.userInfo.cityStr,
+        详细地址: '数据错误' || this.userInfo.cityBak,
+        邮箱: '数据错误' || this.userInfo.email
+      }
+    },
+    cost() {
+      return {
+        商品合计: this.mub,
+        运费: 20,
+        订单金额: this.mub,
+        实际付款: this.mub + 20
+      }
+    },
+    refund() {
+      return {
+        申请人: '展示',
+        退款金额: 20,
+        退款商品: '娃娃',
+        申请时间: new Date().getFullYear() + '/' + new Date().getMonth() + '/' + new Date().getDate()
       }
     },
     mub() {
+      var a = []
+      this.list.forEach(item => {
+        a.push(item.price / 100 * (item.count))
+      })
+      if (a.length > 0) {
+        a = a.reduce((a, b) => {
+          return a + b
+        })
+      }
+      return a
+    },
+    step() {
+      // 是否订单被关闭 跟statusend 有关
+      if (this.orderBaseInfo.statusend == '1') { return 4 }
 
+      return (this.orderBaseInfo.orderStatus - 0) || 1
     }
+
   },
   created() {
     this.id = this.$route.params.id
@@ -135,6 +200,7 @@ export default {
       }
       api.orderList(data).then(res => {
         this.orderBaseInfo = res.data.list[0]
+        console.log('mmm', this.orderBaseInfo)
       })
       api.orderUserInfo(data).then(res => {
         this.userInfo = res.data
@@ -146,33 +212,20 @@ export default {
         console.log(this.list)
       })
     },
-    getSummaries(param) {
-      const { columns, data } = param
-      const sums = []
-      columns.forEach((column, index) => {
-        if (index === 0) {
-          sums[index] = '总价'
-          return
-        }
-        const values = data.map(item => Number(item[column.property]))
-        if (!values.every(value => isNaN(value))) {
-          sums[index] = values.reduce((prev, curr) => {
-            const value = Number(curr)
-            if (!isNaN(value)) {
-              return prev + curr
-            } else {
-              return prev
-            }
-          }, 0)
-          sums[index] += ' 元'
+    sendDone() {
+      api.sendDone({ id: this.orderBaseInfo.orderId }).then(res => {
+        if (res.code == 'S') {
+          window.location.reload()
         } else {
-          sums[index] = 'N/A'
+          this.$message.error(res.msg)
         }
       })
+    },
+    closeOrder() {
 
-      return sums
     }
   }
+
 }
 </script>
 
@@ -200,6 +253,10 @@ export default {
       border-right: 1px solid #dcdfe6;
       border-bottom: 1px solid #dcdfe6;
     }
+  }
+  .price-sum{
+    margin-top: 30px;
+    float: right;
   }
 }
 </style>
