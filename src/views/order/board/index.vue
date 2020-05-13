@@ -1,5 +1,7 @@
 <template>
   <div class="box">
+
+    <!-- 查询条件 -->
     <el-card :body-style="{ padding: '0px' }">
       <div slot="header">
         <span>条件查询</span>
@@ -7,29 +9,28 @@
       <div class="box-title">
         <el-row :gutter="100">
           <el-col :span="6">
-            <el-input v-model="Status.name" :value="Status.name" size="small" placeholder="用户名模糊查询" />
+            <el-input v-model="Status.username" size="small" placeholder="用户名模糊查询" />
           </el-col>
           <el-col :span="6">
             <!-- <el-input size="small" placeholder="请输入内容" /> -->
-            <el-select v-model="Status.status" size="small" placeholder="请选择">
-              <el-option value="0">正在进行</el-option>
-              <el-option value="1">已关闭</el-option>
+            <el-select v-model="Status.statusend" size="small" placeholder="请选择">
+              <el-option value="0" label="已关闭" />
+              <el-option value="1" label="正在进行" />
             </el-select>
           </el-col>
           <el-col :span="6">
-            <el-select v-model="Status.statusend" size="small" placeholder="请选择">
+            <el-select v-model="Status.status" size="small" placeholder="请选择">
               <el-option v-for="(v,key) in orderStatusObj" :key="v" :label="v" :value="key" />
             </el-select>
           </el-col>
           <el-col :span="6">
             <div>
-              <el-button size="small" type="primary">搜索</el-button>
-              <el-button size="small" type="primary">重置</el-button>
+              <el-button size="small" type="primary" @click="Inquire">搜索</el-button>
+              <el-button size="small" type="primary" @click="Reset">重置</el-button>
             </div>
           </el-col>
         </el-row>
       </div>
-
     </el-card>
     <el-card :body-style="{ padding: '30px'}" style="margin-top:30px;">
       <el-table :data="list" border stripe style="width: 100%">
@@ -80,7 +81,7 @@ export default {
   },
   data() {
     return {
-      Status: [],
+      Status: {},
       list: [],
       page: {
         start: 1,
@@ -105,6 +106,9 @@ export default {
   methods: {
     getlist() { // 获取数据
       var data = {
+        username: this.Status.username,
+        status: this.Status.status,
+        statusend: this.Status.statusend,
         ...this.page
       }
 
@@ -128,6 +132,14 @@ export default {
     },
     handleCurrentChange(v) {
       this.page.start = v
+      this.getlist()
+    },
+    Inquire() { // 搜索
+      this.getlist()
+      this.Status = {}
+    },
+    Reset() { // 重置
+      this.Status = {}
       this.getlist()
     }
   }

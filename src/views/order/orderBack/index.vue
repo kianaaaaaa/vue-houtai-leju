@@ -5,31 +5,33 @@
         <span>条件查询</span>
       </div>
       <div class="box-title">
-        <el-row :gutter="100">
-          <el-col :span="6">
-            <el-input v-model="Status.name" :value="Status.name" size="small" placeholder="用户名模糊查询" />
+        <el-row :gutter="30">
+          <el-col :span="4.8">
+            <el-input v-model="Status.orderId" size="small" placeholder="订单模糊查询" />
           </el-col>
-          <el-col :span="6">
+          <el-col :span="4.8">
+            <el-input v-model="Status.userId" size="small" placeholder="用户名id模糊查询" />
+          </el-col>
+          <el-col :span="4.8">
             <!-- <el-input size="small" placeholder="请输入内容" /> -->
-            <el-select v-model="Status.status" size="small" placeholder="请选择">
-              <el-option value="0">正在进行</el-option>
-              <el-option value="1">已关闭</el-option>
+            <el-select v-model="Status.statusend" size="small" placeholder="订单状态">
+              <el-option value="1" label="已关闭" />
+              <el-option value="0" label="正在进行" />
             </el-select>
           </el-col>
-          <el-col :span="6">
-            <el-select v-model="Status.statusend" size="small" placeholder="请选择">
+          <el-col :span="4.8">
+            <el-select v-model="Status.process" size="small" placeholder="请选择">
               <el-option v-for="(v,key) in orderStatusObj" :key="v" :label="v" :value="key" />
             </el-select>
           </el-col>
-          <el-col :span="6">
+          <el-col :span="4.8">
             <div>
-              <el-button size="small" type="primary">搜索</el-button>
-              <el-button size="small" type="primary">重置</el-button>
+              <el-button size="small" type="primary" @click="Inquire">搜索</el-button>
+              <el-button size="small" type="primary" @click="Reset">重置</el-button>
             </div>
           </el-col>
         </el-row>
       </div>
-
     </el-card>
     <el-card :body-style="{ padding: '30px'}" style="margin-top:30px;">
       <el-table :data="list" border stripe style="width: 100%">
@@ -72,7 +74,7 @@ export default {
   },
   data() {
     return {
-      Status: [],
+      Status: {},
       list: [],
       page: {
         start: 1,
@@ -83,11 +85,10 @@ export default {
   computed: {
     orderStatusObj() {
       return {
-        '0': '未付款',
-        '1': '已付款',
-        '2': '已发货',
-        '3': '已收货',
-        '9': '申请退货'
+        '0': '等待处理',
+        '1': '确认退货,等待收货; ',
+        '2': '确认收货,已退款 ',
+        '9': '拒绝退'
       }
     }
   },
@@ -97,6 +98,10 @@ export default {
   methods: {
     getlist() { // 获取数据
       var data = {
+        orderId: this.Status.orderId,
+        process: this.Status.process,
+        statusend: this.Status.statusend,
+        userId: this.Status.userId,
         ...this.page
       }
 
@@ -120,6 +125,14 @@ export default {
     },
     handleCurrentChange(v) {
       this.page.start = v
+      this.getlist()
+    },
+    Inquire() { // 搜索
+      this.getlist()
+      this.Status = {}
+    },
+    Reset() { // 重置
+      this.Status = {}
       this.getlist()
     }
   }
